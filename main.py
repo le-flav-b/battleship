@@ -1,2 +1,6 @@
+from game import Game
+
+
 def main():
-	pass
+	game = Game()
+	game.run()
