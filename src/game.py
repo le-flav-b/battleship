@@ -1,4 +1,7 @@
 import pygame as pg
+
+from src.physics import Pos, Speed
+from src.player import Player
 from src.terrainGen import GenerateMap, ColorMap
 
 
@@ -23,11 +26,18 @@ class Game:
         self.music = True
         self.sound = True
 
+        # player
+        self.player = Player(Pos(self.screen_size[0] / 2, self.screen_size[1] / 2), Speed(0, 0),
+                             10, 100, Player.boat_1_image)
+
     def run(self):
         """Run the game
         """
 
-        print("\n" * 2 + "=" * 73 + "\n" + "=" * 26 + " " * 4 + "GAME  OPENING" + " " * 4 + "=" * 26 + "\n" + "=" * 73 + "\n" * 2)
+        print("\n" * 2
+              + "=" * 73 + "\n"
+              + "=" * 26 + " " * 4 + "GAME  OPENING" + " " * 4 + "=" * 26 + "\n"
+              + "=" * 73 + "\n" * 2)
 
         while True:
 
@@ -93,6 +103,9 @@ class Game:
 
             # map image
             self.screen.blit(self.map_image, (0, 0))
+
+            # player image
+            self.player.display_boat(self.screen)
 
             # update the screen
             pg.display.flip()
