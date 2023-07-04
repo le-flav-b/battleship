@@ -7,7 +7,7 @@ class GenerateMap:
     """Génération procédurale du terrain """
 
     def __init__(self, size=(50, 50), scale=500, octaves=4, persistence=0.6, lacunarity=2.0,
-                 x_starting_pos=0, y_starting_pos=0):
+                 x_starting_pos=0, y_starting_pos=0, seed=0):
         """scale : niveau de zoom, 100 dézoomé, 500 zoomé
            octave : lissage fin de la carte, 4 très lisse, 10 dentelé
            persistence :
@@ -24,17 +24,21 @@ class GenerateMap:
         self.mapSize = size  # size in pixels
         self.heightMap = numpy.zeros(self.mapSize)
 
+        if seed == 0:
+            self.seed = random.randint(0, self.mapSize[0])
+        else:
+            self.seed = seed
+
         self.generate_map()
 
     def generate_map(self):
         """Génération de la heightmap par bruit de perlin"""
-        random_nr = random.randint(0, self.mapSize[0])
         for i in range(self.mapSize[0]):
             for j in range(self.mapSize[1]):
                 new_i = i + self.y_starting_pos
                 new_j = j + self.x_starting_pos
 
-                self.heightMap[i][j] = noise.pnoise3(new_i / self.scale, new_j / self.scale, random_nr,
+                self.heightMap[i][j] = noise.pnoise3(new_i / self.scale, new_j / self.scale, self.seed,
                                                      octaves=self.octaves,
                                                      persistence=self.persistence, lacunarity=self.lacunarity,
                                                      repeatx=10000000, repeaty=10000000, base=0)
