@@ -115,4 +115,5 @@ class Game:
     def close(self):
         """Close the game
         """
+        print("\n" * 2 + "=" * 73 + "\n" + "=" * 26 + " " * 4 + "GAME  CLOSING" + " " * 4 + "=" * 26 + "\n" + "=" * 73 + "\n" * 2)
         pg.quit()
