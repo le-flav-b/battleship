@@ -1,5 +1,7 @@
+import math
+
+
 class Force:
-    """Classe Force (exprimée en Newton)"""
 
     def __init__(self, x_force, y_force):
         self.x = x_force
@@ -49,6 +51,19 @@ class Speed:
     def __init__(self, x_speed, y_speed):
         self.x = x_speed
         self.y = y_speed
+
+    def get_norm(self):
+        return math.sqrt(self.x ** 2 + self.y ** 2)
+
+    def get_orientation(self):
+        norm = self.get_norm()
+        if self.x >= 0:
+            return math.asin(self.y/norm)
+        else:
+            if self.y >= 0:
+                return math.acos(self.x/norm)
+            else:
+                return - math.acos(self.x/norm)
 
     def __str__(self):
         return str(self.__class__) + ": \n" \
