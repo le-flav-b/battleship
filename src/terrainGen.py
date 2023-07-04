@@ -2,8 +2,6 @@ import random
 import noise
 import numpy
 
-import src.color as color
-
 
 class GenerateMap:
     """Génération procédurale du terrain """
@@ -51,18 +49,22 @@ class GenerateMap:
 class ColorMap:
     """Transformation de la heightmap en image RGB"""
 
+    sea = [65, 105, 225]
+    sand = [210, 180, 140]
+    grass = [34, 139, 34]
+
     def __init__(self, generate_map: GenerateMap):
         self.map = generate_map
-        self.colored_map = numpy.zeros((self.map.mapSize[0], self.map.mapSize[1], 3))
+        self.colored_map = numpy.zeros((self.map.mapSize[0], self.map.mapSize[1], 4))
 
     def get_color_map_array(self, sea_level, sand_height):
         """La couleur est définie en fonction de la valeur de la heightmap et du sea level"""
         for i in range(self.map.mapSize[0]):
             for j in range(self.map.mapSize[1]):
                 if self.map.heightMap[i][j] < sea_level:
-                    self.colored_map[i][j] = color.sea
+                    self.colored_map[i][j] = ColorMap.sea
                 elif self.map.heightMap[i][j] < (sea_level + sand_height):
-                    self.colored_map[i][j] = color.sand
+                    self.colored_map[i][j] = ColorMap.sand
                 else:
-                    self.colored_map[i][j] = color.grass
+                    self.colored_map[i][j] = ColorMap.grass
         return self.colored_map
