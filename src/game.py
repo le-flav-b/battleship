@@ -1,60 +1,119 @@
-import time
-
-import pygame
-from src import terrainGen
+import pygame as pg
+from src.terrainGen import GenerateMap, ColorMap
 
 
 class Game:
     """General class for the game
     """
 
-    def __init__(self):
+    def __init__(self, screen_width, screen_height):
         """Create the pygame window and initialize all the elements of the game
         """
 
-        self.screen_size = (1080, 720)
-        self.sealevel = 145
+        # screen size
+        self.screen_size = (screen_width, screen_height)
 
-        # calcul du temps de création de la carte
-        t_debut = time.time()
-        # création de la carte (heightmap)
-        self.map_data = terrainGen.GenerateMap(self.screen_size)
-        # création de l'image associée à la carte
-        self.map_image = pygame.surfarray.make_surface(
-            terrainGen.ColorMap(self.map_data)
-            .get_color_map_array(self.sealevel))
-        t_fin = time.time()
+        # window creation
+        pg.init()
+        self.screen = pg.display.set_mode(self.screen_size)
+        pg.display.set_icon(pg.image.load('assets/images/icon.png'))
+        pg.display.set_caption('Battleship')
 
-        print("Map générée en " + str(int((t_fin-t_debut)*1000)) + " ms")
-
-        pygame.init()
-        self.screen = pygame.display.set_mode(self.screen_size)
-        pygame.display.set_icon(pygame.image.load('assets/images/icon.png'))
-        pygame.display.set_caption('Battleship')
-
-        self.running = False
+        # main settings
+        self.music = True
+        self.sound = True
 
     def run(self):
         """Run the game
         """
 
-        self.running = True
+        print("\n" * 2 + "=" * 73 + "\n" + "=" * 26 + " " * 4 + "GAME  OPENING" + " " * 4 + "=" * 26 + "\n" + "=" * 73 + "\n" * 2)
 
-        while self.running:
+        while True:
 
-            # afficher qqchose à l'écran
+            # 3 states of the game :
+            #   menu (choose settings and make connection then press play),
+            #   game (the map with all the elements and the control of our personnal boat),
+            #   game over (the last game screen with omnivisibility and a filter as background,
+            #              resume of the game stats, and a button to go back to the menu)
+            self.menu_update()
+            self.game_update()
+            self.game_over_update()
+    
+    def menu_update(self):  # TODO: create a menu
+        """Generate the window content when the game is in the menu state
+        """
+
+        print("\n" * 2 + "\t" * 2 + "~~~ MENU ~~~" + "\n" * 2)
+
+        while True:
+            # will be a user choice (like a slider or something)
+            self.sea_level = 145
+            self.sand_height = 5
+
+            # update the screen and check for general events
+            self.general_update()
+
+            break
+
+        # map generation
+        self.map_data = GenerateMap(self.screen_size)
+
+        # map image generation TODO : change the way to do it by putting a blue background and drawing the islands on it
+        self.map_image = pg.surfarray.make_surface(ColorMap(self.map_data).get_color_map_array(self.sea_level, self.sand_height))
+
+    def game_update(self):
+        """Generate the window content when the game is in the game state
+        """
+
+        print("\n" * 2 + "\t" * 2 + "~~~ GAME ~~~" + "\n" * 2)
+
+        while True:
+
+            # map image
             self.screen.blit(self.map_image, (0, 0))
 
-            # mettre à jour l'écran
-            pygame.display.flip()
+            # update the screen and check for general events
+            self.general_update()
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
+    def game_over_update(self):  # TODO: create a game over screen
+        """Generate the window content when the game is in the game over state
+        """
 
-        self.close()
+        print("\n" * 2 + "\t" * 2 + "~~~ GAME OVER ~~~" + "\n" * 2)
+
+        while True:
+
+            # update the screen and check for general events
+            self.general_update()
+
+    def general_update(self):
+        """The updates that are common to all the states of the game
+        """
+
+        # screen update
+        pg.display.flip()
+
+        # general event management
+        for event in pg.event.get():
+
+            # switch the music or the sound effects on/off if the user press the 'm' or 'p' key
+            if event.type == pg.KEYDOWN:
+                # music
+                if event.key == pg.K_m:
+                    self.music = not self.music
+                    print("|| music {}", "ON" if self.music else "OFF")
+                # sound effects
+                if event.key == pg.K_p:
+                    self.sound = not self.sound
+                    print("|| sound effects {}", "ON" if self.sound else "OFF")
+
+            # quit the game if the user press the cross
+            if event.type == pg.QUIT:
+                self.close()
 
     def close(self):
         """Close the game
         """
-        pygame.quit()
+        print("\n" * 2 + "=" * 73 + "\n" + "=" * 26 + " " * 4 + "GAME  CLOSING" + " " * 4 + "=" * 26 + "\n" + "=" * 73 + "\n" * 2)
+        pg.quit()
