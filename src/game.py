@@ -74,9 +74,7 @@ class Game:
                 self.manage_general_events(event)
 
                 if event.type == pg.MOUSEBUTTONDOWN:
-                    print("kkkkk")
                     if play_button_rect.collidepoint(event.pos):
-                        print("fdshdnthb")
                         start = True
 
         # map generation
