@@ -55,7 +55,7 @@ class ColorMap:
 
     def __init__(self, generate_map: GenerateMap):
         self.map = generate_map
-        self.colored_map = numpy.zeros((self.map.mapSize[0], self.map.mapSize[1], 4))
+        self.colored_map = numpy.zeros((self.map.mapSize[0], self.map.mapSize[1], 3))
 
     def get_color_map_array(self, sea_level, sand_height):
         """La couleur est définie en fonction de la valeur de la heightmap et du sea level"""
