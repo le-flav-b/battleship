@@ -1,5 +1,7 @@
+import math
+
+
 class Force:
-    """Classe Force (exprimée en Newton)"""
 
     def __init__(self, x_force, y_force):
         self.x = x_force
@@ -27,8 +29,8 @@ class Force:
         return self * other
 
     def __str__(self):
-        return str(self.__class__) + ": \n"\
-               + "\tx= " + str(self.x) + "\n"\
+        return str(self.__class__) + ": \n" \
+               + "\tx= " + str(self.x) + "\n" \
                + "\ty= " + str(self.y)
 
 
@@ -39,8 +41,8 @@ class Acceleration:
         self.y = y_acc
 
     def __str__(self):
-        return str(self.__class__) + ": \n"\
-               + "\tx= " + str(self.x) + "\n"\
+        return str(self.__class__) + ": \n" \
+               + "\tx= " + str(self.x) + "\n" \
                + "\ty= " + str(self.y)
 
 
@@ -49,6 +51,22 @@ class Speed:
     def __init__(self, x_speed, y_speed):
         self.x = x_speed
         self.y = y_speed
+
+    def get_norm(self):
+        return math.sqrt(self.x ** 2 + self.y ** 2)
+
+    def get_orientation(self):
+        norm = self.get_norm()
+        if not norm == 0:
+            if self.x >= 0:
+                return math.asin(self.y / norm)
+            else:
+                if self.y >= 0:
+                    return math.acos(self.x / norm)
+                else:
+                    return - math.acos(self.x / norm)
+        else:
+            return None
 
     def __str__(self):
         return str(self.__class__) + ": \n" \
@@ -63,8 +81,8 @@ class Pos:
         self.y = y_pos
 
     def __str__(self):
-        return str(self.__class__) + ": \n"\
-               + "\tx= " + str(self.x) + "\n"\
+        return str(self.__class__) + ": \n" \
+               + "\tx= " + str(self.x) + "\n" \
                + "\ty= " + str(self.y)
 
 
@@ -91,8 +109,8 @@ class Dot:
         self.move(acceleration, time_step)
 
     def __str__(self):
-        return str(self.__class__) + ": \n"\
-               + "\tpos.x= " + str(self.pos.x) + "\n"\
+        return str(self.__class__) + ": \n" \
+               + "\tpos.x= " + str(self.pos.x) + "\n" \
                + "\tpos.y= " + str(self.pos.y) + "\n" \
                + "\tspeed.y= " + str(self.speed.y) + "\n" \
                + "\tspeed.y= " + str(self.speed.y) + "\n" \
