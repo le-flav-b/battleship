@@ -44,17 +44,40 @@ class Game:
         """Generate the window content when the game is in the menu state
         """
 
+        background = pg.transform.scale(pg.image.load('assets/images/menu_background.png'), self.screen_size)
+        play_button = pg.transform.scale(pg.image.load('assets/images/start_button.png'), (int(self.screen_size[0] / 2), int(self.screen_size[1] / 6.5)))
+        play_button_place = (int(self.screen_size[0] / 4.25), int(self.screen_size[1] / 1.41))
+        play_button_rect = play_button.get_rect()
+        play_button_rect.x, play_button_rect.y = play_button_place
+
         print("\n" * 2 + "\t" * 2 + "~~~ MENU ~~~" + "\n" * 2)
 
-        while True:
+        start = False
+        while not start:
+
+            # apply background image scaled to the screen size
+            self.screen.blit(background, (0, 0))
+
+            # apply the start button
+            self.screen.blit(play_button, play_button_place)
+
             # will be a user choice (like a slider or something)
             self.sea_level = 145
             self.sand_height = 5
 
-            # update the screen and check for general events
-            self.general_update()
+            # update the screen
+            pg.display.flip()
 
-            break
+            # check for events
+            for event in pg.event.get():
+
+                self.manage_general_events(event)
+
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    print("kkkkk")
+                    if play_button_rect.collidepoint(event.pos):
+                        print("fdshdnthb")
+                        start = True
 
         # map generation
         self.map_data = GenerateMap(self.screen_size)
@@ -73,8 +96,13 @@ class Game:
             # map image
             self.screen.blit(self.map_image, (0, 0))
 
-            # update the screen and check for general events
-            self.general_update()
+            # update the screen
+            pg.display.flip()
+
+            # check for events
+            for event in pg.event.get():
+
+                self.manage_general_events(event)
 
     def game_over_update(self):  # TODO: create a game over screen
         """Generate the window content when the game is in the game over state
@@ -84,33 +112,32 @@ class Game:
 
         while True:
 
-            # update the screen and check for general events
-            self.general_update()
+            # update the screen
+            pg.display.flip()
 
-    def general_update(self):
+            # check for events
+            for event in pg.event.get():
+
+                self.manage_general_events(event)
+
+    def manage_general_events(self, event):
         """The updates that are common to all the states of the game
         """
 
-        # screen update
-        pg.display.flip()
+        # switch the music or the sound effects on/off if the user press the 'm' or 'p' key
+        if event.type == pg.KEYDOWN:
+            # music
+            if event.key == pg.K_m:
+                self.music = not self.music
+                print(f"|| music {'ON' if self.music else 'OFF'}")
+            # sound effects
+            if event.key == pg.K_p:
+                self.sound = not self.sound
+                print(f"|| sound effects {'ON' if self.sound else 'OFF'}")
 
-        # general event management
-        for event in pg.event.get():
-
-            # switch the music or the sound effects on/off if the user press the 'm' or 'p' key
-            if event.type == pg.KEYDOWN:
-                # music
-                if event.key == pg.K_m:
-                    self.music = not self.music
-                    print("|| music {}", "ON" if self.music else "OFF")
-                # sound effects
-                if event.key == pg.K_p:
-                    self.sound = not self.sound
-                    print("|| sound effects {}", "ON" if self.sound else "OFF")
-
-            # quit the game if the user press the cross
-            if event.type == pg.QUIT:
-                self.close()
+        # quit the game if the user press the cross
+        if event.type == pg.QUIT:
+            self.close()
 
     def close(self):
         """Close the game
