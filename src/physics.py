@@ -94,19 +94,16 @@ class Dot:
         self.speed = speed
         self.mass = mass
 
-    def move(self, acceleration: Acceleration, time_step):
-        """ne pas appeler cette fonction, passer par un Bilan Des Forces et utiliser la méthode run()"""
+    def run(self, resultant: Force, time_step):
+        """calcule le déplacement du point mobile"""
+        acceleration = Acceleration(resultant.x / self.mass,
+                                    resultant.y / self.mass)
+
         self.pos.x += 0.5 * acceleration.x * time_step ** 2 + self.speed.x * time_step
         self.pos.y += 0.5 * acceleration.y * time_step ** 2 + self.speed.y * time_step
 
         self.speed.x += acceleration.x * time_step
         self.speed.y += acceleration.y * time_step
-
-    def run(self, resultant: Force, time_step):
-        """calcule le déplacement du point mobile"""
-        acceleration = Acceleration(resultant.x / self.mass,
-                                    resultant.y / self.mass)
-        self.move(acceleration, time_step)
 
     def __str__(self):
         return str(self.__class__) + ": \n" \
