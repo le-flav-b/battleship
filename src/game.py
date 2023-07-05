@@ -1,6 +1,7 @@
 import time
-
 import pygame as pg
+import pygame_widgets as pgw
+from pygame_widgets.slider import Slider
 
 from src.physics import Pos, Speed
 from src.player import Player
@@ -70,10 +71,14 @@ class Game:
         self.category = Game.CATEGORY_MENU
 
         background = pg.transform.scale(pg.image.load('assets/images/menu_background.png'), self.screen_size)
+
         play_button = pg.transform.scale(pg.image.load('assets/images/start_button.png'), (int(self.screen_size[0] / 2), int(self.screen_size[1] / 6.5)))
         play_button_place = (int(self.screen_size[0] / 4.25), int(self.screen_size[1] / 1.41))
         play_button_rect = play_button.get_rect()
         play_button_rect.x, play_button_rect.y = play_button_place
+
+         # TODO: beetwen 0 and 0.24 with a step of 0.01
+        sea_level_slider = Slider(self.screen, self.screen_size[0] // 13.5, self.screen_size[1] // 2, self.screen_size[0] // 5.4, self.screen_size[0] // 54, min=0, max=30, step=1)
 
         print("\n" * 2 + "\t" * 2 + "~~~ MENU ~~~" + "\n" * 2)
 
@@ -87,20 +92,24 @@ class Game:
             self.screen.blit(play_button, play_button_place)
 
             # will be a user choice (like a slider or something)
-            self.sea_level = 145
             self.sand_height = 5
 
-            # update the screen
-            pg.display.flip()
-
             # check for events
-            for event in pg.event.get():
+            events = pg.event.get()
+            for event in events:
 
                 self.manage_general_events(event)
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if play_button_rect.collidepoint(event.pos):
-                        start = True
+                        start = True            
+
+            # update the screen
+            pgw.update(events)
+            pg.display.flip()
+
+        # TODO 0.255 - sea_level_slider.getValue()
+        self.sea_level = 30 - sea_level_slider.getValue() + 130
 
         # map generation
         self.map_data = GenerateMap(self.screen_size)
@@ -179,7 +188,7 @@ class Game:
         """The updates that are common to all the states of the game
         """
 
-        print(time.ctime(), self.pressing_keys)
+        #print(time.ctime(), self.pressing_keys)
 
         # switch the music or the sound effects on/off if the user press the 'm' or 'p' key
         if event.type == pg.KEYDOWN:
