@@ -2,7 +2,7 @@ from src.game import Game
 from sys import argv
 
 
-def main(window_width: int= 1080, window_height: int= 720):
+def main(window_width: int = 1080, window_height: int = 720):
     """Start the game
     """
     game = Game(window_width, window_height)
