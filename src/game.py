@@ -16,6 +16,7 @@ class Game:
     CATEGORY_MENU = 1
     CATEGORY_GAME = 2
     CATEGORY_GAME_OVER = 3
+    CATEGORY_CLOSE = 4
 
     def __init__(self, screen_width, screen_height):
         """Create the pygame window and initialize all the elements of the game
@@ -34,8 +35,8 @@ class Game:
         self.music = True
         self.sound = True
 
-        # CATEGORY : menu, game, or game over
-        self.category = Game.CATEGORY_NONE
+        # CATEGORY : change category right BEFORE going on it
+        self.category = Game.CATEGORY_MENU
 
         # input gestion
         self.pressing_keys = {pg.K_z: False,
@@ -53,7 +54,7 @@ class Game:
               + "=" * 26 + " " * 4 + "GAME  OPENING" + " " * 4 + "=" * 26 + "\n"
               + "=" * 73 + "\n" * 2)
 
-        while True:
+        while not self.category == Game.CATEGORY_CLOSE:
 
             # 3 states of the game :
             #   menu (choose settings and make connection then press play),
@@ -127,11 +128,11 @@ class Game:
 
         # player
         self.player = Player(Pos(self.screen_size[0] / 2, self.screen_size[1] / 2), Speed(0, 0),
-                             mass=10, max_power=500, image=Player.boat_1_image)
+                             mass=10, max_power=1000, image=Player.boat_1_image)
         last_frame = time.time()
         time_step = 0
 
-        while True:
+        while self.category == Game.CATEGORY_GAME:
 
             # map image
             self.screen.blit(self.map_image, (0, 0))
@@ -163,18 +164,21 @@ class Game:
 
             # check for events
             for event in pg.event.get():
-
                 self.manage_general_events(event)
+
+                if event.type == pg.KEYDOWN:
+                    self.pressing_keys[event.key] = True
+                    print()
+                if event.type == pg.KEYUP:
+                    self.pressing_keys[event.key] = False
 
     def game_over_update(self):  # TODO: create a game over screen
         """Generate the window content when the game is in the game over state
         """
 
-        self.category = Game.CATEGORY_GAME_OVER
-
         print("\n" * 2 + "\t" * 2 + "~~~ GAME OVER ~~~" + "\n" * 2)
 
-        while True:
+        while self.category == Game.CATEGORY_GAME_OVER:
 
             # update the screen
             pg.display.flip()
@@ -205,16 +209,10 @@ class Game:
         if event.type == pg.QUIT:
             self.close()
 
-        # change the dict related to the currently inputs
-        if self.category == Game.CATEGORY_GAME:
-            if event.type == pg.KEYDOWN:
-                self.pressing_keys[event.key] = True
-            if event.type == pg.KEYUP:
-                self.pressing_keys[event.key] = False
-
 
     def close(self):
         """Close the game
         """
+        self.category = Game.CATEGORY_CLOSE
         print("\n" * 2 + "=" * 73 + "\n" + "=" * 26 + " " * 4 + "GAME  CLOSING" + " " * 4 + "=" * 26 + "\n" + "=" * 73 + "\n" * 2)
         pg.quit()
