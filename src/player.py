@@ -9,5 +9,4 @@ class Player(Boat):
     boat_2_image = pygame.image.load("assets/images/boat_friendly.png")
 
     def __init__(self, pos: Pos, speed: Speed, mass, max_power, image):
-        super().__init__(pos, speed, mass, max_power)
-        self.image = image
+        super().__init__(pos, speed, mass, max_power, image)
