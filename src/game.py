@@ -9,21 +9,20 @@ from src.terrainGen import GenerateMap, ColorMap
 
 
 class Game:
-    """General class for the game
+    """General class for the game, which generates and displays all the elements in each state of the game
     """
 
-    CATEGORY_NONE = 0
-    CATEGORY_MENU = 1
-    CATEGORY_GAME = 2
-    CATEGORY_GAME_OVER = 3
-    CATEGORY_CLOSE = 4
+    def __init__(self, screen_width: int, screen_height: int) -> None:
+        """Create the pygame window and initialize the main settings of the game
 
-    def __init__(self, screen_width, screen_height):
-        """Create the pygame window and initialize all the elements of the game
+        Args:
+            screen_width (int): the width of the window
+            screen_height (int): the height of the window
         """
 
         # screen size
-        self.screen_size = (screen_width, screen_height)
+        self.screen_width, self.screen_height = screen_width, screen_height
+        self.screen_size = (self.screen_width, self.screen_height)
 
         # window creation
         pg.init()
@@ -32,60 +31,52 @@ class Game:
         pg.display.set_caption('Battleship')
 
         # main settings
+        self.running = True
         self.music = True
         self.sound = True
 
-        # CATEGORY : change category right BEFORE going on it
-        self.category = Game.CATEGORY_MENU
-
         # input gestion
-        self.pressing_keys = {pg.K_z: False,
-                              pg.K_q: False,
-                              pg.K_s: False,
-                              pg.K_d: False}
+        usefull_keys = [pg.K_z, pg.K_q, pg.K_s, pg.K_d, pg.K_UP, pg.K_LEFT, pg.K_DOWN, pg.K_RIGHT, pg.K_SPACE]
+        self.pressing_keys = {key: False for key in usefull_keys}
 
-
-    def run(self):
-        """Run the game
+    def run(self) -> None:
+        """Manages the loop of the different states of the game to chain the games
+        The 3 states of the game :
+            menu (choose settings and make connection then press play),
+            game (the map with all the elements and the control of our personal boat),
+            game over (the last game screen with omni visibility and a filter as background,
+                       resume of the game stats, and a button to go back to the menu)
         """
+        while self.game_over_update(self.game_update(self.menu_update())): pass
 
-        print("\n" * 2
-              + "=" * 73 + "\n"
-              + "=" * 26 + " " * 4 + "GAME  OPENING" + " " * 4 + "=" * 26 + "\n"
-              + "=" * 73 + "\n" * 2)
-
-        while not self.category == Game.CATEGORY_CLOSE:
-
-            # 3 states of the game :
-            #   menu (choose settings and make connection then press play),
-            #   game (the map with all the elements and the control of our personal boat),
-            #   game over (the last game screen with omni visibility and a filter as background,
-            #              resume of the game stats, and a button to go back to the menu)
-            self.menu_update()
-            self.game_update()
-            self.game_over_update()
     
-    def menu_update(self):  # TODO: create a menu
+    def menu_update(self) -> int:
         """Generate the window content when the game is in the menu state
-        """
 
-        self.category = Game.CATEGORY_MENU
+        Returns:
+            int: 0 if the user has closed the game, 1 if he press the play button
+        """        
 
         background = pg.transform.scale(pg.image.load('assets/images/menu_background.png'), self.screen_size)
 
-        play_button = pg.transform.scale(pg.image.load('assets/images/start_button.png'), (int(self.screen_size[0] / 2), int(self.screen_size[1] / 6.5)))
-        play_button_place = (int(self.screen_size[0] / 4.25), int(self.screen_size[1] / 1.41))
+        play_button = pg.transform.scale(pg.image.load('assets/images/start_button.png'), (int(self.screen_width / 2), int(self.screen_height / 6.5)))
+        play_button_place = (int(self.screen_width / 4.25), int(self.screen_height / 1.41))
         play_button_rect = play_button.get_rect()
         play_button_rect.x, play_button_rect.y = play_button_place
 
+        temp = [int(self.screen_width / 10), int(self.screen_width / 5.4), int(self.screen_width / 54)]
+        slider_labels_font = pg.font.SysFont('monospace', 15, 1)  # TODO: Maybe make a file with all fonts
          # TODO: beetwen 0 and 0.270 with a step of 0.018
-        sea_level_label = pg.font.SysFont('monospace', 15, 1).render('Islands Quantity :', True, (0, 0, 0))
-        sea_level_slider = Slider(self.screen, int(self.screen_size[0] / 10), int(self.screen_size[1] / 1.97), int(self.screen_size[0] / 5.4), int(self.screen_size[0] / 54), min=0, max=28, step=2)
+        sea_level_label = slider_labels_font.render('Islands Quantity :', True, (0, 0, 0))
+        sea_level_slider = Slider(self.screen, temp[0], int(self.screen_height / 1.97), temp[1], temp[2], min=0, max=28, step=2)
          # TODO: beetwen 0 and 0.1092 with a step of 0.00728
-        sand_height_label = pg.font.SysFont('monospace', 15, 1).render('Beaches Size :', True, (0, 0, 0))
-        sand_height_slider = Slider(self.screen, int(self.screen_size[0] / 10), int(self.screen_size[1] / 1.53), int(self.screen_size[0] / 5.4), int(self.screen_size[0] / 54), min=0, max=14, step=1)
+        sand_height_label = slider_labels_font.render('Beaches Size :', True, (0, 0, 0))
+        sand_height_slider = Slider(self.screen, temp[0], int(self.screen_height / 1.53), temp[1], temp[2], min=0, max=14, step=1)
+        del temp
 
-        print("\n" * 2 + "\t" * 2 + "~~~ MENU ~~~" + "\n" * 2)
+        labels_x_pos = int(self.screen_width / 11)
+        sea_level_label_x_pos = int(self.screen_height * 0.489 - 15)
+        sand_height_label_x_pos = int(self.screen_height * 0.635 - 15)
 
         start = False
         while not start:
@@ -94,8 +85,8 @@ class Game:
             self.screen.blit(background, (0, 0))
 
             # apply the sea and sand level labels
-            self.screen.blit(sea_level_label, (int(self.screen_size[0] / 11), int(self.screen_size[1] * 0.489 - 15)))
-            self.screen.blit(sand_height_label, (int(self.screen_size[0] / 11), int(self.screen_size[1] * 0.635 - 15)))
+            self.screen.blit(sea_level_label, (labels_x_pos, sea_level_label_x_pos))
+            self.screen.blit(sand_height_label, (labels_x_pos, sand_height_label_x_pos))
 
             # apply the start button
             self.screen.blit(play_button, play_button_place)
@@ -104,7 +95,8 @@ class Game:
             events = pg.event.get()
             for event in events:
 
-                self.manage_general_events(event)
+                if self.manage_general_events(event):
+                    return 0
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if play_button_rect.collidepoint(event.pos):
@@ -125,21 +117,27 @@ class Game:
         # map image generation TODO : change the way to do it by putting a blue background and drawing the islands on it
         self.map_image = pg.surfarray.make_surface(ColorMap(self.map_data).get_color_map_array(self.sea_level, self.sand_height))
 
-    def game_update(self):
+        return 1
+
+    def game_update(self, running: int) -> int:
         """Generate the window content when the game is in the game state
-        """
 
-        self.category = Game.CATEGORY_GAME
+        Args:
+            running (int): 0 if the user has closed the game, 1 if he has pressed the play button
 
-        print("\n" * 2 + "\t" * 2 + "~~~ GAME ~~~" + "\n" * 2)
+        Returns:
+            int: 0 if the user has closed the game, 1 if the game is over
+        """        
+
+        if not running: return 0
 
         # player
-        self.player = Player(Pos(self.screen_size[0] / 2, self.screen_size[1] / 2), Speed(0, 0),
+        self.player = Player(Pos(self.screen_width / 2, self.screen_height / 2), Speed(0, 0),
                              mass=10, max_power=1000, image=Player.boat_1_image)
         last_frame = time.time()
-        time_step = 0
 
-        while self.category == Game.CATEGORY_GAME:
+        over = False
+        while not over:
 
             # map image
             self.screen.blit(self.map_image, (0, 0))
@@ -150,15 +148,15 @@ class Game:
             last_frame = time_now
 
             # player moves
-            if self.pressing_keys[pg.K_z]:
+            if self.pressing_keys[pg.K_z] or self.pressing_keys[pg.K_UP]:
                 self.player.set_engine_power(self.player.max_power)
-            if self.pressing_keys[pg.K_s]:
+            if self.pressing_keys[pg.K_s] or self.pressing_keys[pg.K_DOWN]:
                 self.player.set_engine_power(-self.player.max_power)
-            if not self.pressing_keys[pg.K_z] and not self.pressing_keys[pg.K_s]:
+            elif not (self.pressing_keys[pg.K_z] or self.pressing_keys[pg.K_UP] or self.pressing_keys[pg.K_s] or self.pressing_keys[pg.K_DOWN]):
                 self.player.set_engine_power(0)
-            if self.pressing_keys[pg.K_q]:
+            if self.pressing_keys[pg.K_q] or self.pressing_keys[pg.K_LEFT]:
                 self.player.rotate(-1, time_step)
-            if self.pressing_keys[pg.K_d]:
+            if self.pressing_keys[pg.K_d] or self.pressing_keys[pg.K_RIGHT]:
                 self.player.rotate(1, time_step)
 
             self.player.run(time_step)
@@ -171,21 +169,32 @@ class Game:
 
             # check for events
             for event in pg.event.get():
-                self.manage_general_events(event)
 
-                if event.type == pg.KEYDOWN:
+                if self.manage_general_events(event):
+                    return 0
+
+                # manage pressed keys
+                if event.type == pg.KEYDOWN and event.key in self.pressing_keys.keys():
                     self.pressing_keys[event.key] = True
-                    print()
-                if event.type == pg.KEYUP:
+                if event.type == pg.KEYUP and event.key in self.pressing_keys.keys():
                     self.pressing_keys[event.key] = False
 
-    def game_over_update(self):  # TODO: create a game over screen
+        return 1
+
+    def game_over_update(self, running: int) -> int:  # TODO: create a game over screen
         """Generate the window content when the game is in the game over state
-        """
 
-        print("\n" * 2 + "\t" * 2 + "~~~ GAME OVER ~~~" + "\n" * 2)
+        Args:
+            running (int): 0 if the user has closed the game, 1 if the game is over
 
-        while self.category == Game.CATEGORY_GAME_OVER:
+        Returns:
+            int: 0 if the user has closed the game, 1 if he press the space bar
+        """        
+
+        if not running: return 0
+
+        return_to_menu = False
+        while not return_to_menu:
 
             # update the screen
             pg.display.flip()
@@ -193,9 +202,12 @@ class Game:
             # check for events
             for event in pg.event.get():
 
-                self.manage_general_events(event)
+                if self.manage_general_events(event):
+                    return 0
 
-    def manage_general_events(self, event):
+        return 1
+
+    def manage_general_events(self, event: list) -> bool:
         """The updates that are common to all the states of the game
         """
 
@@ -215,11 +227,12 @@ class Game:
         # quit the game if the user press the cross
         if event.type == pg.QUIT:
             self.close()
+            return True
+        
+        return False
 
 
     def close(self):
         """Close the game
         """
-        self.category = Game.CATEGORY_CLOSE
-        print("\n" * 2 + "=" * 73 + "\n" + "=" * 26 + " " * 4 + "GAME  CLOSING" + " " * 4 + "=" * 26 + "\n" + "=" * 73 + "\n" * 2)
         pg.quit()
