@@ -1,4 +1,4 @@
-import time
+from time import time as t
 import pygame as pg
 import pygame_widgets as pgw
 from pygame_widgets.slider import Slider
@@ -49,13 +49,13 @@ class Game:
         """
         while self.game_over_update(self.game_update(self.menu_update())): pass
 
-    
+
     def menu_update(self) -> int:
         """Generate the window content when the game is in the menu state
 
         Returns:
             int: 0 if the user has closed the game, 1 if he press the play button
-        """        
+        """
 
         background = pg.transform.scale(pg.image.load('assets/images/menu_background.png'), self.screen_size)
 
@@ -127,14 +127,14 @@ class Game:
 
         Returns:
             int: 0 if the user has closed the game, 1 if the game is over
-        """        
+        """
 
         if not running: return 0
 
         # player
         self.player = Player(Pos(self.screen_width / 2, self.screen_height / 2), Speed(0, 0),
                              mass=10, max_power=1000, image=Player.boat_1_image)
-        last_frame = time.time()
+        last_frame = t()
 
         over = False
         while not over:
@@ -143,7 +143,7 @@ class Game:
             self.screen.blit(self.map_image, (0, 0))
 
             # gestion du temps pour que la vitesse du joueur ne depende pas de la vitesse du processeur
-            time_now = time.time()
+            time_now = t()
             time_step = time_now - last_frame
             last_frame = time_now
 
@@ -189,7 +189,7 @@ class Game:
 
         Returns:
             int: 0 if the user has closed the game, 1 if he press the space bar
-        """        
+        """
 
         if not running: return 0
 
@@ -211,8 +211,6 @@ class Game:
         """The updates that are common to all the states of the game
         """
 
-        #print(time.ctime(), self.pressing_keys)
-
         # switch the music or the sound effects on/off if the user press the 'm' or 'p' key
         if event.type == pg.KEYDOWN:
             # music
@@ -228,7 +226,7 @@ class Game:
         if event.type == pg.QUIT:
             self.close()
             return True
-        
+
         return False
 
 
