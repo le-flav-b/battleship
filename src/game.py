@@ -78,8 +78,12 @@ class Game:
         play_button_rect = play_button.get_rect()
         play_button_rect.x, play_button_rect.y = play_button_place
 
-         # TODO: beetwen 0 and 0.24 with a step of 0.01
-        sea_level_slider = Slider(self.screen, self.screen_size[0] // 13.5, self.screen_size[1] // 2, self.screen_size[0] // 5.4, self.screen_size[0] // 54, min=0, max=30, step=1)
+         # TODO: beetwen 0 and 0.270 with a step of 0.018
+        sea_level_label = pg.font.SysFont('monospace', 15, 1).render('Islands Quantity :', True, (0, 0, 0))
+        sea_level_slider = Slider(self.screen, int(self.screen_size[0] / 10), int(self.screen_size[1] / 1.97), int(self.screen_size[0] / 5.4), int(self.screen_size[0] / 54), min=0, max=28, step=2)
+         # TODO: beetwen 0 and 0.1092 with a step of 0.00728
+        sand_height_label = pg.font.SysFont('monospace', 15, 1).render('Beaches Size :', True, (0, 0, 0))
+        sand_height_slider = Slider(self.screen, int(self.screen_size[0] / 10), int(self.screen_size[1] / 1.53), int(self.screen_size[0] / 5.4), int(self.screen_size[0] / 54), min=0, max=14, step=1)
 
         print("\n" * 2 + "\t" * 2 + "~~~ MENU ~~~" + "\n" * 2)
 
@@ -89,11 +93,12 @@ class Game:
             # apply background image scaled to the screen size
             self.screen.blit(background, (0, 0))
 
+            # apply the sea and sand level labels
+            self.screen.blit(sea_level_label, (int(self.screen_size[0] / 11), int(self.screen_size[1] * 0.489 - 15)))
+            self.screen.blit(sand_height_label, (int(self.screen_size[0] / 11), int(self.screen_size[1] * 0.635 - 15)))
+
             # apply the start button
             self.screen.blit(play_button, play_button_place)
-
-            # will be a user choice (like a slider or something)
-            self.sand_height = 5
 
             # check for events
             events = pg.event.get()
@@ -111,6 +116,8 @@ class Game:
 
         # TODO 0.255 - sea_level_slider.getValue()
         self.sea_level = 30 - sea_level_slider.getValue() + 130
+        # TODO 0.00728 + sea_level_hand.getValue()
+        self.sand_height = sand_height_slider.getValue() + 1
 
         # map generation
         self.map_data = GenerateMap(self.screen_size)
