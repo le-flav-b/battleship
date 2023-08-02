@@ -49,7 +49,6 @@ class Game:
         """
         while self.game_over_update(self.game_update(self.menu_update())): pass
 
-
     def menu_update(self) -> int:
         """Generate the window content when the game is in the menu state
 
@@ -59,19 +58,22 @@ class Game:
 
         background = pg.transform.scale(pg.image.load('assets/images/menu_background.png'), self.screen_size)
 
-        play_button = pg.transform.scale(pg.image.load('assets/images/start_button.png'), (int(self.screen_width / 2), int(self.screen_height / 6.5)))
+        play_button = pg.transform.scale(pg.image.load('assets/images/start_button.png'),
+                                         (int(self.screen_width / 2), int(self.screen_height / 6.5)))
         play_button_place = (int(self.screen_width / 4.25), int(self.screen_height / 1.41))
         play_button_rect = play_button.get_rect()
         play_button_rect.x, play_button_rect.y = play_button_place
 
         temp = [int(self.screen_width / 10), int(self.screen_width / 5.4), int(self.screen_width / 54)]
         slider_labels_font = pg.font.SysFont('monospace', 15, 1)  # TODO: Maybe make a file with all fonts
-         # TODO: beetwen 0 and 0.270 with a step of 0.018
+        # TODO: beetwen 0 and 0.270 with a step of 0.018
         sea_level_label = slider_labels_font.render('Islands Quantity :', True, (0, 0, 0))
-        sea_level_slider = Slider(self.screen, temp[0], int(self.screen_height / 1.97), temp[1], temp[2], min=0, max=28, step=2)
-         # TODO: beetwen 0 and 0.1092 with a step of 0.00728
+        sea_level_slider = Slider(self.screen, temp[0], int(self.screen_height / 1.97), temp[1], temp[2], min=0, max=28,
+                                  step=2)
+        # TODO: beetwen 0 and 0.1092 with a step of 0.00728
         sand_height_label = slider_labels_font.render('Beaches Size :', True, (0, 0, 0))
-        sand_height_slider = Slider(self.screen, temp[0], int(self.screen_height / 1.53), temp[1], temp[2], min=0, max=14, step=1)
+        sand_height_slider = Slider(self.screen, temp[0], int(self.screen_height / 1.53), temp[1], temp[2], min=0,
+                                    max=14, step=1)
         del temp
 
         labels_x_pos = int(self.screen_width / 11)
@@ -100,22 +102,23 @@ class Game:
 
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if play_button_rect.collidepoint(event.pos):
-                        start = True            
+                        start = True
 
-            # update the screen
+                        # update the screen
             pgw.update(events)
             pg.display.flip()
 
         # TODO 0.255 - sea_level_slider.getValue()
         self.sea_level = 30 - sea_level_slider.getValue() + 130
         # TODO 0.00728 + sea_level_hand.getValue()
-        self.sand_height = sand_height_slider.getValue() + 1
+        self.sand_level = sand_height_slider.getValue() + 1
 
         # map generation
         self.map_data = GenerateMap(self.screen_size)
 
-        # map image generation TODO : change the way to do it by putting a blue background and drawing the islands on it
-        self.map_image = pg.surfarray.make_surface(ColorMap(self.map_data).get_color_map_array(self.sea_level, self.sand_height))
+        # map image generation
+        self.map_image = pg.surfarray.make_surface(
+            ColorMap(self.map_data).get_color_map_array(self.sea_level, self.sand_level))
 
         return 1
 
@@ -147,19 +150,30 @@ class Game:
             time_step = time_now - last_frame
             last_frame = time_now
 
+            # affichage fps
+            # font = pygame.font.Font(None, 24)
+            # fps_value = 0
+            # if time_step != 0:
+            #     fps_value = 1/time_step
+            # text = font.render(str(fps_value), 1, (255, 255, 255))
+            # self.screen.blit(text, (0, 0))
+
             # player moves
             if self.pressing_keys[pg.K_z] or self.pressing_keys[pg.K_UP]:
                 self.player.set_engine_power(self.player.max_power)
             if self.pressing_keys[pg.K_s] or self.pressing_keys[pg.K_DOWN]:
                 self.player.set_engine_power(-self.player.max_power)
-            elif not (self.pressing_keys[pg.K_z] or self.pressing_keys[pg.K_UP] or self.pressing_keys[pg.K_s] or self.pressing_keys[pg.K_DOWN]):
+            elif not (self.pressing_keys[pg.K_z] or self.pressing_keys[pg.K_UP] or self.pressing_keys[pg.K_s] or
+                      self.pressing_keys[pg.K_DOWN]):
                 self.player.set_engine_power(0)
             if self.pressing_keys[pg.K_q] or self.pressing_keys[pg.K_LEFT]:
                 self.player.rotate(-1, time_step)
             if self.pressing_keys[pg.K_d] or self.pressing_keys[pg.K_RIGHT]:
                 self.player.rotate(1, time_step)
 
-            self.player.run(time_step)
+            self.player.run(time_step,
+                            self.map_data.heightMap[int(self.player.dot.pos.x)][int(self.player.dot.pos.y)],
+                            self.sea_level)
 
             # player image
             self.player.display_boat(self.screen)
@@ -207,7 +221,7 @@ class Game:
 
         return 1
 
-    def manage_general_events(self, event: list) -> bool:
+    def manage_general_events(self, event: pg.event.Event) -> bool:
         """The updates that are common to all the states of the game
         """
 
@@ -228,7 +242,6 @@ class Game:
             return True
 
         return False
-
 
     def close(self):
         """Close the game
