@@ -8,15 +8,15 @@ from src.physics import Dot, Pos, Speed, Force
 class Boat(pygame.sprite.Sprite):
     boat_bot_image = pygame.image.load("assets/images/boat_bot.png")
 
-    def __init__(self, pos: Pos, speed: Speed, mass, max_power, boat_image=boat_bot_image):
+    def __init__(self, pos: Pos, speed: Speed, mass, max_power=1000, boat_image=boat_bot_image):
         """création du bateau, orientation en radians"""
         super().__init__()
 
         # boat's mechanics constants
         self.engine_power = 0
-        self.max_power = 1000
+        self.max_power = max_power
         self.coeff_water_friction = 5
-        self.coeff_sand_friction = 200
+        self.coeff_sand_friction = 1000
         self.coeff_swivel = 1e-3
 
         # boat's mechanics related
@@ -27,13 +27,19 @@ class Boat(pygame.sprite.Sprite):
 
         # pygame's related
         self.size_image = (48, 16)
-        self.base_image = pygame.transform.scale(Boat.boat_bot_image, self.size_image)
+        self.base_image = pygame.transform.scale(boat_image, self.size_image)
         self.image = self.base_image
         self.rect = self.image.get_rect()
 
-    def rotate(self, angle, time_step):
+    def rotate(self, angle, time_step, map_data, sea_level):
         """lorsque le bateau tourne, il conserve sa vitesse
         le bateau tourne moins vite lorsqu'il est à l'arrêt"""
+
+        # bloque la rotation du bateau s'il n'est pas dans l'eau
+        height_level = self.get_height_level(map_data)
+        if height_level - 1 > sea_level:
+            return
+
         speed_norm = self.dot.speed.get_norm()
         if speed_norm != 0:
             self.orientation += angle * time_step
@@ -51,25 +57,27 @@ class Boat(pygame.sprite.Sprite):
         else:
             self.engine_power = self.max_power
 
-    def run(self, time_step, height_level, height_level_limit):
+    def run(self, time_step, map_data, sea_level):
         """calcul des forces en présence et application de la seconde loi de Newton"""
 
         sand_friction_force = Force(0, 0)
         water_friction_force = Force(0, 0)
 
         speed_norm = self.dot.speed.get_norm()
+        height_level = self.get_height_level(map_data)
 
         # forces dépendantes de la vitesse, ainsi, pas de calcul si la vitesse est nulle donc l'orientation none
         temp_orientation = self.dot.speed.get_orientation()
         if temp_orientation is not None:
             if temp_orientation % math.pi != self.orientation % math.pi:
-                self.orientation = temp_orientation
+                if speed_norm > 1:
+                    self.orientation = temp_orientation
             # freinage du bateau en raison des frottements de l'eau
             water_friction_force = -self.coeff_water_friction * speed_norm * Force(math.cos(temp_orientation),
                                                                                    math.sin(temp_orientation))
 
             # si le bateau est trop proche du sable, il s'enlisse
-            coeff_resistance_sand = (height_level - height_level_limit - 2) * self.coeff_sand_friction
+            coeff_resistance_sand = (height_level - sea_level) * self.coeff_sand_friction
             if coeff_resistance_sand > 0:
                 sand_friction_force = -coeff_resistance_sand * Force(math.cos(temp_orientation),
                                                                      math.sin(temp_orientation))
@@ -88,6 +96,9 @@ class Boat(pygame.sprite.Sprite):
 
     def fire(self, direction_left: bool):
         pass
+
+    def get_height_level(self, map_data):
+        return map_data.heightMap[int(self.dot.pos.x)][int(self.dot.pos.y)]
 
     def display_boat(self, screen: Surface):
         self.image = pygame.transform.rotate(self.base_image, -self.orientation * 180 / math.pi)

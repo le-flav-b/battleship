@@ -36,8 +36,8 @@ class Game:
         self.sound = True
 
         # input gestion
-        usefull_keys = [pg.K_z, pg.K_q, pg.K_s, pg.K_d, pg.K_UP, pg.K_LEFT, pg.K_DOWN, pg.K_RIGHT, pg.K_SPACE]
-        self.pressing_keys = {key: False for key in usefull_keys}
+        useful_keys = [pg.K_z, pg.K_q, pg.K_s, pg.K_d, pg.K_UP, pg.K_LEFT, pg.K_DOWN, pg.K_RIGHT, pg.K_SPACE]
+        self.pressing_keys = {key: False for key in useful_keys}
 
     def run(self) -> None:
         """Manages the loop of the different states of the game to chain the games
@@ -53,7 +53,7 @@ class Game:
         """Generate the window content when the game is in the menu state
 
         Returns:
-            int: 0 if the user has closed the game, 1 if he press the play button
+            int: 0 if the user has closed the game, 1 if he presses the play button
         """
 
         background = pg.transform.scale(pg.image.load('assets/images/menu_background.png'), self.screen_size)
@@ -66,11 +66,11 @@ class Game:
 
         temp = [int(self.screen_width / 10), int(self.screen_width / 5.4), int(self.screen_width / 54)]
         slider_labels_font = pg.font.SysFont('monospace', 15, 1)  # TODO: Maybe make a file with all fonts
-        # TODO: beetwen 0 and 0.270 with a step of 0.018
+        # TODO: between 0 and 0.270 with a step of 0.018
         sea_level_label = slider_labels_font.render('Islands Quantity :', True, (0, 0, 0))
         sea_level_slider = Slider(self.screen, temp[0], int(self.screen_height / 1.97), temp[1], temp[2], min=0, max=28,
                                   step=2)
-        # TODO: beetwen 0 and 0.1092 with a step of 0.00728
+        # TODO: between 0 and 0.1092 with a step of 0.00728
         sand_height_label = slider_labels_font.render('Beaches Size :', True, (0, 0, 0))
         sand_height_slider = Slider(self.screen, temp[0], int(self.screen_height / 1.53), temp[1], temp[2], min=0,
                                     max=14, step=1)
@@ -150,15 +150,28 @@ class Game:
             time_step = time_now - last_frame
             last_frame = time_now
 
-            # affichage fps
-            # font = pygame.font.Font(None, 24)
-            # fps_value = 0
-            # if time_step != 0:
-            #     fps_value = 1/time_step
-            # text = font.render(str(fps_value), 1, (255, 255, 255))
-            # self.screen.blit(text, (0, 0))
+            # print fps
+            """font = pg.font.Font(None, 24)
+            fps_value = 0
+            if time_step != 0:
+                fps_value = 1/time_step
+            text = font.render("FPS: " + str(int(fps_value)), 1, (255, 255, 255))
+            self.screen.blit(text, (0, 0))"""
+
+            # print speed
+            """font = pg.font.Font(None, 24)
+            speed_value = self.player.dot.speed.get_norm()
+            text = font.render("Speed: " + str(int(speed_value)), 1, (255, 255, 255))
+            self.screen.blit(text, (0, 20))"""
+
+            # print height
+            """font = pg.font.Font(None, 24)
+            height_value = self.player.get_height_level(self.map_data)
+            text = font.render("Height: " + str(int(height_value)), 1, (255, 255, 255))
+            self.screen.blit(text, (0, 40))"""
 
             # player moves
+            # engine
             if self.pressing_keys[pg.K_z] or self.pressing_keys[pg.K_UP]:
                 self.player.set_engine_power(self.player.max_power)
             if self.pressing_keys[pg.K_s] or self.pressing_keys[pg.K_DOWN]:
@@ -166,13 +179,14 @@ class Game:
             elif not (self.pressing_keys[pg.K_z] or self.pressing_keys[pg.K_UP] or self.pressing_keys[pg.K_s] or
                       self.pressing_keys[pg.K_DOWN]):
                 self.player.set_engine_power(0)
-            if self.pressing_keys[pg.K_q] or self.pressing_keys[pg.K_LEFT]:
-                self.player.rotate(-1, time_step)
-            if self.pressing_keys[pg.K_d] or self.pressing_keys[pg.K_RIGHT]:
-                self.player.rotate(1, time_step)
 
-            self.player.run(time_step,
-                            self.map_data.heightMap[int(self.player.dot.pos.x)][int(self.player.dot.pos.y)],
+            # rotate
+            if self.pressing_keys[pg.K_q] or self.pressing_keys[pg.K_LEFT]:
+                self.player.rotate(-1, time_step, self.map_data, self.sea_level)
+            if self.pressing_keys[pg.K_d] or self.pressing_keys[pg.K_RIGHT]:
+                self.player.rotate(1, time_step, self.map_data, self.sea_level)
+
+            self.player.run(time_step, self.map_data,
                             self.sea_level)
 
             # player image
@@ -202,7 +216,7 @@ class Game:
             running (int): 0 if the user has closed the game, 1 if the game is over
 
         Returns:
-            int: 0 if the user has closed the game, 1 if he press the space bar
+            int: 0 if the user has closed the game, 1 if he presses the space bar
         """
 
         if not running: return 0
