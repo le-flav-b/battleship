@@ -1,6 +1,5 @@
 import math
 import pygame
-from pygame import Surface
 
 from src.physics import Dot, Pos, Speed, Force
 
@@ -30,6 +29,12 @@ class Boat(pygame.sprite.Sprite):
         self.base_image = pygame.transform.scale(boat_image, self.size_image)
         self.image = self.base_image
         self.rect = self.image.get_rect()
+        self.rect.center = (self.dot.pos.x, self.dot.pos.y)
+
+        # game's mechanics related
+        self.max_health = 100
+        self.health = 60
+        self.bullets_damage = 5
 
     def rotate(self, angle, time_step, map_data, sea_level):
         """lorsque le bateau tourne, il conserve sa vitesse
@@ -97,10 +102,24 @@ class Boat(pygame.sprite.Sprite):
     def fire(self, direction_left: bool):
         pass
 
+    def get_damage(self, damage_points):
+        self.health -= damage_points
+
     def get_height_level(self, map_data):
         return map_data.heightMap[int(self.dot.pos.x)][int(self.dot.pos.y)]
 
-    def display_boat(self, screen: Surface):
+    def display_boat(self, screen: pygame.Surface):
         self.image = pygame.transform.rotate(self.base_image, -self.orientation * 180 / math.pi)
-
         screen.blit(self.image, self.rect)
+
+    def display_health(self, screen: pygame.Surface):
+        black = (0, 0, 0)
+        green = (65, 225, 77)
+
+        back_rect = pygame.rect.Rect(0, 0, 34, 10)
+        back_rect.center = (self.dot.pos.x, self.dot.pos.y - self.rect.height / 2 - 8)
+        pygame.draw.rect(screen, black, back_rect)
+
+        front_rect = pygame.rect.Rect(back_rect.x + 1, back_rect.y + 1, 32 * self.health / self.max_health, 8)
+        pygame.draw.rect(screen, green, front_rect)
+

@@ -3,6 +3,7 @@ import pygame as pg
 import pygame_widgets as pgw
 from pygame_widgets.slider import Slider
 
+from src.boat import Boat
 from src.physics import Pos, Speed
 from src.player import Player
 from src.terrainGen import GenerateMap, ColorMap
@@ -135,8 +136,12 @@ class Game:
         if not running: return 0
 
         # player
-        self.player = Player(Pos(self.screen_width / 2, self.screen_height / 2), Speed(0, 0),
-                             mass=10, max_power=1000, image=Player.boat_1_image)
+        self.player = Player(Pos(self.screen_width / 2, self.screen_height / 2), Speed(0, 0), mass=10, max_power=1000,
+                             boat_image=Player.boat_1_image)
+
+        # enemy
+        self.enemy = Boat(Pos(self.screen_width / 4, self.screen_height / 2), Speed(0, 0), mass=10, max_power=1000,
+                          boat_image=Player.boat_2_image)
         last_frame = t()
 
         over = False
@@ -186,11 +191,15 @@ class Game:
             if self.pressing_keys[pg.K_d] or self.pressing_keys[pg.K_RIGHT]:
                 self.player.rotate(1, time_step, self.map_data, self.sea_level)
 
-            self.player.run(time_step, self.map_data,
-                            self.sea_level)
+            self.player.run(time_step, self.map_data, self.sea_level)
 
             # player image
             self.player.display_boat(self.screen)
+            self.enemy.display_boat(self.screen)
+
+            # player health
+            self.player.display_health(self.screen)
+            self.enemy.display_health(self.screen)
 
             # update the screen
             pg.display.flip()
