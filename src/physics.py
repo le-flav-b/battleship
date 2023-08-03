@@ -68,6 +68,18 @@ class Speed:
         else:
             return None
 
+    def __mul__(self, other):
+        """multiplication de la vitesse par un scalaire"""
+        if (type(other) is int) or (type(other) is float):
+            res = Speed(self.x * other,
+                        self.y * other)
+            return res
+        else:
+            raise TypeError("unsupported operand type(s) for +: " + str(type(self)) + " and " + str(type(other)))
+
+    def __rmul__(self, other):
+        return self * other
+
     def __str__(self):
         return str(self.__class__) + ": \n" \
                + "\tx= " + str(self.x) + "\n" \
