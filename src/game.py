@@ -136,12 +136,16 @@ class Game:
         if not running: return 0
 
         # player
-        self.player = Player(Pos(self.screen_width / 2, self.screen_height / 2), Speed(0, 0), mass=10, max_power=1000,
-                             boat_image=Player.boat_1_image)
+        self.player = Player(self.screen, Pos(self.screen_width / 2, self.screen_height / 2), Speed(0, 0),
+                             mass=10, max_power=1000, boat_image=Player.boat_1_image)
 
         # enemy
-        self.enemy = Boat(Pos(self.screen_width / 4, self.screen_height / 2), Speed(0, 0), mass=10, max_power=1000,
-                          boat_image=Player.boat_2_image)
+        self.enemy = Boat(self.screen, Pos(self.screen_width / 4, self.screen_height / 2), Speed(0, 0),
+                          mass=10, max_power=1000, boat_image=Player.boat_2_image)
+
+        # bullets
+        self.bullets = []
+
         last_frame = t()
 
         over = False
@@ -193,13 +197,18 @@ class Game:
 
             self.player.run(time_step, self.map_data, self.sea_level)
 
+            # bullets moves
+            for bullet in self.bullets:
+                bullet.run(time_step)
+                bullet.display_bullet()
+
             # player image
-            self.player.display_boat(self.screen)
-            self.enemy.display_boat(self.screen)
+            self.player.display_boat()
+            self.enemy.display_boat()
 
             # player health
-            self.player.display_health(self.screen)
-            self.enemy.display_health(self.screen)
+            self.player.display_health()
+            self.enemy.display_health()
 
             # update the screen
             pg.display.flip()
@@ -215,6 +224,12 @@ class Game:
                     self.pressing_keys[event.key] = True
                 if event.type == pg.KEYUP and event.key in self.pressing_keys.keys():
                     self.pressing_keys[event.key] = False
+
+                if event.type == pg.MOUSEBUTTONUP:
+                    if event.button == pg.BUTTON_LEFT:
+                        self.bullets.append(self.player.fire(True))
+                    if event.button == pg.BUTTON_RIGHT:
+                        self.bullets.append(self.player.fire(False))
 
         return 1
 
