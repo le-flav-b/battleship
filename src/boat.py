@@ -65,7 +65,7 @@ class Boat(pygame.sprite.Sprite):
             self.engine_power = self.max_power
 
     def run(self, time_step, map_data, sea_level):
-
+        """opérations à effectuer à chaque tick"""
         # calcul des forces en présence et application de la seconde loi de Newton
         speed_norm = self.dot.speed.get_norm()
         resultant = self.calcul_resultante(map_data, sea_level)
@@ -80,6 +80,7 @@ class Boat(pygame.sprite.Sprite):
         self.rect.center = (self.dot.pos.x, self.dot.pos.y)
 
     def calcul_resultante(self, map_data, sea_level):
+        """calcul des forces à appliquer au bateau"""
         sand_friction_force = Force(0, 0)
         water_friction_force = Force(0, 0)
 
@@ -109,10 +110,12 @@ class Boat(pygame.sprite.Sprite):
         return engine_force + water_friction_force + sand_friction_force
 
     def rest_in_screen(self):
+        """appelée à chaque tick, empeche le bateau de sortir de l'écran"""
         self.dot.pos.x = max(0, min(self.dot.pos.x, self.screen.get_width() - 1))
         self.dot.pos.y = max(0, min(self.dot.pos.y, self.screen.get_height() - 1))
 
     def fire(self, direction_left: bool) -> Bullet:
+        """création d'un boulet de canon, celui-ci est renvoyé afin de constituer une liste de tous les boulets"""
         if direction_left:
             bullet_speed = self.bullet_speed_norm * Speed(math.cos(self.orientation - math.pi / 2),
                                                           math.sin(self.orientation - math.pi / 2))
@@ -122,17 +125,20 @@ class Boat(pygame.sprite.Sprite):
         bullet = Bullet(self.screen, self, Pos(self.dot.pos.x, self.dot.pos.y), bullet_speed)
         return bullet
 
-    def get_damage(self, damage_points):
+    def take_damage(self, damage_points):
         self.health -= damage_points
 
     def get_height_level(self, map_data):
+        """renvoie la hauteur du terrain sous le bateau"""
         return map_data.heightMap[int(self.dot.pos.x)][int(self.dot.pos.y)]
 
     def display_boat(self):
+        """affiche le bateau à l'écran"""
         self.image = pygame.transform.rotate(self.base_image, -self.orientation * 180 / math.pi)
         self.screen.blit(self.image, self.rect)
 
     def display_health(self):
+        """affiche la barre de vie juste au dessus du bateau"""
         black = (0, 0, 0)
         green = (65, 225, 77)
 

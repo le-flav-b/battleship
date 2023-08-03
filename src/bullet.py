@@ -14,10 +14,12 @@ class Bullet:
         self.rect.center = (self.dot.pos.x, self.dot.pos.y)
 
     def run(self, time_step):
+        """opérations à effectuer à chaque tick"""
         self.dot.run(Force(0, 0), time_step)
         self.rect.center = (self.dot.pos.x, self.dot.pos.y)
 
     def display_bullet(self):
+        """affiche le boulet à l'écran"""
         self.screen.blit(Bullet.bullet_image, self.rect)
 
     def __str__(self):
