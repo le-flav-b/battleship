@@ -1,5 +1,6 @@
 from time import time as t
 import pygame as pg
+import pygame.sprite
 import pygame_widgets as pgw
 from pygame_widgets.slider import Slider
 
@@ -145,11 +146,12 @@ class Game:
                      mass=10, max_power=1000, boat_image=Player.boat_2_image)
 
         # create boat and bullet groups
-        boat_group = pg.sprite.Group()
+        player_g = pg.sprite.Group()
+        enemy_g = pg.sprite.Group()
         bullet_group = pg.sprite.Group()
 
-        boat_group.add(player)
-        boat_group.add(enemy)
+        player_g.add(player)
+        enemy_g.add(enemy)
 
         last_frame = t()
 
@@ -205,13 +207,27 @@ class Game:
             # bullets moves
             for bullet in bullet_group:
                 bullet.run(time_step)
-                # todo check collisions
+                if pygame.sprite.spritecollide(bullet, player_g, False):
+                    if pygame.sprite.spritecollide(bullet, player_g, False, pygame.sprite.collide_mask):
+                        print("player touched")
+                        player.take_damage(bullet.shooter_boat.bullets_damage)
+                        bullet.kill()
+                    else:
+                        print("player frolé")
+                if pygame.sprite.spritecollide(bullet, enemy_g, False):
+                    if pygame.sprite.spritecollide(bullet, enemy_g, False, pygame.sprite.collide_mask):
+                        print("enemy touched")
+                        enemy.take_damage(bullet.shooter_boat.bullets_damage)
+                        bullet.kill()
+                    else:
+                        print("enemy frolé")
 
             # player health
             player.display_health()
             enemy.display_health()
 
-            boat_group.draw(self.screen)
+            player_g.draw(self.screen)
+            enemy_g.draw(self.screen)
             bullet_group.draw(self.screen)
 
             # update the screen

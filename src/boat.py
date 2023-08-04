@@ -131,6 +131,13 @@ class Boat(pygame.sprite.Sprite):
 
     def take_damage(self, damage_points):
         self.health -= damage_points
+        if not self.is_still_alive():
+            self.kill()
+
+    def is_still_alive(self) -> bool:
+        if self.health <= 0:
+            return False
+        return True
 
     def get_height_level(self, map_data):
         """renvoie la hauteur du terrain sous le bateau"""
