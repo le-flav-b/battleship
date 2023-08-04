@@ -104,6 +104,7 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if play_button_rect.collidepoint(event.pos):
                         start = True
+                        #todo afficher un mask noir quazi transparent
 
                         # update the screen
             pgw.update(events)
@@ -136,15 +137,19 @@ class Game:
         if not running: return 0
 
         # player
-        self.player = Player(self.screen, Pos(self.screen_width / 2, self.screen_height / 2), Speed(0, 0),
-                             mass=10, max_power=1000, boat_image=Player.boat_1_image)
+        player = Player(self.screen, Pos(self.screen_width / 2, self.screen_height / 2), Speed(0, 0),
+                        mass=10, max_power=1000, boat_image=Player.boat_1_image)
 
         # enemy
-        self.enemy = Boat(self.screen, Pos(self.screen_width / 4, self.screen_height / 2), Speed(0, 0),
-                          mass=10, max_power=1000, boat_image=Player.boat_2_image)
+        enemy = Boat(self.screen, Pos(self.screen_width / 4, self.screen_height / 2), Speed(0, 0),
+                     mass=10, max_power=1000, boat_image=Player.boat_2_image)
 
-        # bullets
-        self.bullets = []
+        # create boat and bullet groups
+        boat_group = pg.sprite.Group()
+        bullet_group = pg.sprite.Group()
+
+        boat_group.add(player)
+        boat_group.add(enemy)
 
         last_frame = t()
 
@@ -160,55 +165,54 @@ class Game:
             last_frame = time_now
 
             # print fps
-            """font = pg.font.Font(None, 24)
+            font = pg.font.Font(None, 24)
             fps_value = 0
             if time_step != 0:
                 fps_value = 1/time_step
             text = font.render("FPS: " + str(int(fps_value)), 1, (255, 255, 255))
-            self.screen.blit(text, (0, 0))"""
+            self.screen.blit(text, (0, 0))
 
             # print speed
-            """font = pg.font.Font(None, 24)
-            speed_value = self.player.dot.speed.get_norm()
+            font = pg.font.Font(None, 24)
+            speed_value = player.dot.speed.get_norm()
             text = font.render("Speed: " + str(int(speed_value)), 1, (255, 255, 255))
-            self.screen.blit(text, (0, 20))"""
+            self.screen.blit(text, (0, 20))
 
             # print height
-            """font = pg.font.Font(None, 24)
-            height_value = self.player.get_height_level(self.map_data)
+            font = pg.font.Font(None, 24)
+            height_value = player.get_height_level(self.map_data)
             text = font.render("Height: " + str(int(height_value)), 1, (255, 255, 255))
-            self.screen.blit(text, (0, 40))"""
+            self.screen.blit(text, (0, 40))
 
             # player moves
             # engine
             if self.pressing_keys[pg.K_z] or self.pressing_keys[pg.K_UP]:
-                self.player.set_engine_power(self.player.max_power)
+                player.set_engine_power(player.max_power)
             if self.pressing_keys[pg.K_s] or self.pressing_keys[pg.K_DOWN]:
-                self.player.set_engine_power(-self.player.max_power)
+                player.set_engine_power(-player.max_power)
             elif not (self.pressing_keys[pg.K_z] or self.pressing_keys[pg.K_UP] or self.pressing_keys[pg.K_s] or
                       self.pressing_keys[pg.K_DOWN]):
-                self.player.set_engine_power(0)
+                player.set_engine_power(0)
 
             # rotate
             if self.pressing_keys[pg.K_q] or self.pressing_keys[pg.K_LEFT]:
-                self.player.rotate(-1, time_step, self.map_data, self.sea_level)
+                player.rotate(-1, time_step, self.map_data, self.sea_level)
             if self.pressing_keys[pg.K_d] or self.pressing_keys[pg.K_RIGHT]:
-                self.player.rotate(1, time_step, self.map_data, self.sea_level)
+                player.rotate(1, time_step, self.map_data, self.sea_level)
 
-            self.player.run(time_step, self.map_data, self.sea_level)
+            player.run(time_step, self.map_data, self.sea_level)
 
             # bullets moves
-            for bullet in self.bullets:
+            for bullet in bullet_group:
                 bullet.run(time_step)
-                bullet.display_bullet()
-
-            # player image
-            self.player.display_boat()
-            self.enemy.display_boat()
+                # todo check collisions
 
             # player health
-            self.player.display_health()
-            self.enemy.display_health()
+            player.display_health()
+            enemy.display_health()
+
+            boat_group.draw(self.screen)
+            bullet_group.draw(self.screen)
 
             # update the screen
             pg.display.flip()
@@ -225,11 +229,11 @@ class Game:
                 if event.type == pg.KEYUP and event.key in self.pressing_keys.keys():
                     self.pressing_keys[event.key] = False
 
-                if event.type == pg.MOUSEBUTTONUP:
+                if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == pg.BUTTON_LEFT:
-                        self.bullets.append(self.player.fire(True))
+                        bullet_group.add(player.fire(True))
                     if event.button == pg.BUTTON_RIGHT:
-                        self.bullets.append(self.player.fire(False))
+                        bullet_group.add(player.fire(False))
 
         return 1
 

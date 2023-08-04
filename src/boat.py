@@ -7,14 +7,16 @@ from src.physics import Dot, Pos, Speed, Force
 class Boat(pygame.sprite.Sprite):
     boat_bot_image = pygame.image.load("assets/images/boat_bot.png")
 
-    def __init__(self, screen: pygame.Surface, pos: Pos, speed: Speed, mass, max_power=1000, boat_image=boat_bot_image):
+    def __init__(self, screen: pygame.Surface, pos: Pos, speed: Speed, mass, max_power=1000, boat_image=boat_bot_image,
+                 *groups):
         """création du bateau, orientation en radians"""
-        super().__init__()
+
+        super().__init__(*groups)
 
         # boat's mechanics constants
         self.max_power = max_power
         self.coeff_water_friction = 5
-        self.coeff_sand_friction = 1000
+        self.coeff_sand_friction = 3000
         self.coeff_swivel = 1e-3
 
         # boat's mechanics related
@@ -76,8 +78,10 @@ class Boat(pygame.sprite.Sprite):
             self.dot.speed = Speed(0, 0)
 
         self.rest_in_screen()
+        self.image = pygame.transform.rotate(self.base_image, -self.orientation * 180 / math.pi)
         self.rect = self.image.get_rect()
         self.rect.center = (self.dot.pos.x, self.dot.pos.y)
+        self.screen.blit(self.image, self.rect)
 
     def calcul_resultante(self, map_data, sea_level):
         """calcul des forces à appliquer au bateau"""
@@ -131,11 +135,6 @@ class Boat(pygame.sprite.Sprite):
     def get_height_level(self, map_data):
         """renvoie la hauteur du terrain sous le bateau"""
         return map_data.heightMap[int(self.dot.pos.x)][int(self.dot.pos.y)]
-
-    def display_boat(self):
-        """affiche le bateau à l'écran"""
-        self.image = pygame.transform.rotate(self.base_image, -self.orientation * 180 / math.pi)
-        self.screen.blit(self.image, self.rect)
 
     def display_health(self):
         """affiche la barre de vie juste au dessus du bateau"""
