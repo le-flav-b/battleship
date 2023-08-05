@@ -145,12 +145,13 @@ class Boat(pygame.sprite.Sprite):
 
     def display_health(self):
         """affiche la barre de vie juste au dessus du bateau"""
-        black = (0, 0, 0)
-        green = (65, 225, 77)
+        if self.alive():
+            black = (0, 0, 0)
+            green = (65, 225, 77)
 
-        back_rect = pygame.rect.Rect(0, 0, 34, 10)
-        back_rect.center = (self.dot.pos.x, self.dot.pos.y - self.rect.height / 2 - 8)
-        pygame.draw.rect(self.screen, black, back_rect)
+            back_rect = pygame.rect.Rect(0, 0, 34, 10)
+            back_rect.center = (self.dot.pos.x, self.dot.pos.y - self.rect.height / 2 - 8)
+            pygame.draw.rect(self.screen, black, back_rect)
 
-        front_rect = pygame.rect.Rect(back_rect.x + 1, back_rect.y + 1, 32 * self.health / self.max_health, 8)
-        pygame.draw.rect(self.screen, green, front_rect)
+            front_rect = pygame.rect.Rect(back_rect.x + 1, back_rect.y + 1, 32 * self.health / self.max_health, 8)
+            pygame.draw.rect(self.screen, green, front_rect)
