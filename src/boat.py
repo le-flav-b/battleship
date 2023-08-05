@@ -88,38 +88,42 @@ class Boat(pygame.sprite.Sprite):
         sand_friction_force = Force(0, 0)
         water_friction_force = Force(0, 0)
 
+        speed_norm = self.dot.speed.get_norm()
         height_level = self.get_height_level(map_data)
-        print("height level:", height_level, "sand_level:", sea_level + sand_level)
+        print("height level:", height_level, "sea_level:", sea_level, "sand_level:", sea_level + sand_level)
 
         # block the boat in the land if it goes to
-        if not height_level <= sea_level + sand_level:
+        if height_level >= sea_level and speed_norm <= 20:
+            self.dot.speed.x = 0
+            self.dot.speed.y = 0
+            return Force(0, 0)
+
+        if height_level >= sea_level + sand_level:
             self.dot.speed.x *= 0.5
             self.dot.speed.y *= 0.5
             return Force(0, 0)
-        else:
-            speed_norm = self.dot.speed.get_norm()
 
-            # forces dépendantes de la vitesse, ainsi, pas de calcul si la vitesse est nulle donc l'orientation none
-            temp_orientation = self.dot.speed.get_orientation()
-            if temp_orientation is not None:
-                if temp_orientation % math.pi != self.orientation % math.pi:
-                    if speed_norm > 1:
-                        self.orientation = temp_orientation
-                # freinage du bateau en raison des frottements de l'eau
-                water_friction_force = -self.coeff_water_friction * speed_norm * Force(math.cos(temp_orientation),
-                                                                                       math.sin(temp_orientation))
+        # forces dépendantes de la vitesse, ainsi, pas de calcul si la vitesse est nulle donc l'orientation none
+        temp_orientation = self.dot.speed.get_orientation()
+        if temp_orientation is not None:
+            if temp_orientation % math.pi != self.orientation % math.pi:
+                if speed_norm > 1:
+                    self.orientation = temp_orientation
+            # freinage du bateau en raison des frottements de l'eau
+            water_friction_force = -self.coeff_water_friction * speed_norm * Force(math.cos(temp_orientation),
+                                                                                   math.sin(temp_orientation))
 
-                # si le bateau est trop proche du sable, il s'enlisse
-                coeff_resistance_sand = (height_level - sea_level) * self.coeff_sand_friction
-                if coeff_resistance_sand > 0:
-                    sand_friction_force = -coeff_resistance_sand * Force(math.cos(temp_orientation),
-                                                                         math.sin(temp_orientation))
+            # si le bateau est trop proche du sable, il s'enlisse
+            coeff_resistance_sand = (height_level - sea_level) * self.coeff_sand_friction
+            if coeff_resistance_sand > 0:
+                sand_friction_force = -coeff_resistance_sand * Force(math.cos(temp_orientation),
+                                                                     math.sin(temp_orientation))
 
-            # force motrice
-            engine_force = self.engine_power * Force(math.cos(self.orientation),
-                                                     math.sin(self.orientation))
+        # force motrice
+        engine_force = self.engine_power * Force(math.cos(self.orientation),
+                                                 math.sin(self.orientation))
 
-            return engine_force + water_friction_force + sand_friction_force
+        return engine_force + water_friction_force + sand_friction_force
 
     def rest_in_screen(self):
         """appelée à chaque tick, empeche le bateau de sortir de l'écran"""
