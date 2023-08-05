@@ -7,7 +7,7 @@ from pygame_widgets.slider import Slider
 from src.boat import Boat
 from src.physics import Pos, Speed
 from src.player import Player
-from src.terrainGen import GenerateMap, ColorMap
+from src.terrainGen import GenerateMap, ColorMap, SpawnPoint
 
 
 class Game:
@@ -116,11 +116,8 @@ class Game:
         # TODO 0.00728 + sea_level_hand.getValue()
         self.sand_level = sand_height_slider.getValue() + 1
 
-        # heightmap generation
-        self.map_data = GenerateMap(self.screen_size)
 
-        # map image and mask generation
-        self.color_map = ColorMap(self.map_data, self.sea_level, self.sand_level)
+
 
         return 1
 
@@ -136,12 +133,21 @@ class Game:
 
         if not running: return 0
 
+        # heightmap generation
+        map_data = GenerateMap(self.screen_size)
+
+        # map image and mask generation
+        self.color_map = ColorMap(map_data, self.sea_level, self.sand_level)
+
+        # define spawn points
+        spawn_point = SpawnPoint(map_data, self.sea_level, 50)
+
         # player
-        player = Player(self.screen, Pos(self.screen_width / 2, self.screen_height / 2), Speed(0, 0),
+        player = Player(self.screen, spawn_point.get_spawn_point(), Speed(0, 0),
                         mass=10, max_power=2000, boat_image=Player.boat_1_image)
 
         # enemy
-        enemy = Boat(self.screen, Pos(self.screen_width / 4, self.screen_height / 2), Speed(0, 0),
+        enemy = Boat(self.screen, spawn_point.get_spawn_point(), Speed(0, 0),
                      mass=10, max_power=1000, boat_image=Player.boat_2_image)
 
         # create boat and bullet groups
@@ -181,7 +187,7 @@ class Game:
 
             # print height
             font = pg.font.Font(None, 24)
-            height_value = player.get_height_level(self.map_data)
+            height_value = player.get_height_level(map_data)
             text = font.render("Height: " + str(int(height_value)), 1, (255, 255, 255))
             self.screen.blit(text, (0, 40))
 
@@ -197,11 +203,11 @@ class Game:
 
             # rotate
             if self.pressing_keys[pg.K_q] or self.pressing_keys[pg.K_LEFT]:
-                player.rotate(-1, time_step, self.map_data, self.sea_level)
+                player.rotate(-1, time_step, map_data, self.sea_level)
             if self.pressing_keys[pg.K_d] or self.pressing_keys[pg.K_RIGHT]:
-                player.rotate(1, time_step, self.map_data, self.sea_level)
+                player.rotate(1, time_step, map_data, self.sea_level)
 
-            player.run(time_step, self.map_data, self.sea_level, self.sand_level)
+            player.run(time_step, map_data, self.sea_level, self.sand_level)
 
             # bullets moves
             for bullet in bullet_group:

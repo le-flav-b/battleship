@@ -3,6 +3,8 @@ import noise
 import numpy
 import pygame.sprite
 
+from src.physics import Pos
+
 
 class GenerateMap:
     """Génération procédurale du terrain """
@@ -97,3 +99,31 @@ def make_surface_rgba(array):
     surface_alpha[:, :] = array[:, :, 3]
 
     return surface
+
+
+class SpawnPoint:
+
+    def __init__(self, generated_map: GenerateMap, sea_level, space_between_spawn_point):
+        self.sbsp = space_between_spawn_point
+        self.map = generated_map
+        self.possible_spawns = numpy.empty((int(self.map.mapSize[0] / self.sbsp), int(self.map.mapSize[1] / self.sbsp), 1),
+                                           bool)
+        self.nb_spawn_points = 0
+        for i in range(len(self.possible_spawns)):
+            for j in range(len(self.possible_spawns[0])):
+                if self.map.heightMap[i * self.sbsp][j * self.sbsp] < sea_level:
+                    self.possible_spawns[i][j] = True
+                    self.nb_spawn_points += 1
+                else:
+                    self.possible_spawns[i][j] = False
+
+    def get_spawn_point(self) -> Pos:
+        selected_spawn = random.randint(1, self.nb_spawn_points)
+        spawn_points_passed = 0
+        for i in range(len(self.possible_spawns)):
+            for j in range(len(self.possible_spawns[0])):
+                if self.possible_spawns[i][j]:
+                    spawn_points_passed += 1
+                    if spawn_points_passed == selected_spawn:
+                        coordinates = Pos(i * self.sbsp, j * self.sbsp)
+                        return coordinates
