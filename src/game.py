@@ -116,12 +116,11 @@ class Game:
         # TODO 0.00728 + sea_level_hand.getValue()
         self.sand_level = sand_height_slider.getValue() + 1
 
-        # map generation
+        # heightmap generation
         self.map_data = GenerateMap(self.screen_size)
 
-        # map image generation
-        self.map_image = pg.surfarray.make_surface(
-            ColorMap(self.map_data).get_color_map_array(self.sea_level, self.sand_level))
+        # map image and mask generation
+        self.color_map = ColorMap(self.map_data, self.sea_level, self.sand_level)
 
         return 1
 
@@ -159,7 +158,7 @@ class Game:
         while not over:
 
             # map image
-            self.screen.blit(self.map_image, (0, 0))
+            self.screen.blit(self.color_map.image, (0, 0))
 
             # gestion du temps pour que la vitesse du joueur ne depende pas de la vitesse du processeur
             time_now = t()
@@ -215,6 +214,8 @@ class Game:
                     if pygame.sprite.spritecollide(bullet, enemy_g, False, pygame.sprite.collide_mask):
                         enemy.take_damage(bullet.shooter_boat.bullets_damage)
                         bullet.kill()
+
+            pygame.sprite.spritecollide(self.color_map, bullet_group, True, pygame.sprite.collide_mask)
 
             # player health
             player.display_health()

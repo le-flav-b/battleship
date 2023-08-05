@@ -1,6 +1,7 @@
 import random
 import noise
 import numpy
+import pygame.sprite
 
 
 class GenerateMap:
@@ -46,25 +47,53 @@ class GenerateMap:
         return self.heightMap
 
 
-class ColorMap:
+class ColorMap(pygame.sprite.Sprite):
     """Transformation de la heightmap en image RGB"""
 
     sea = [65, 105, 225]
     sand = [210, 180, 140]
     grass = [34, 139, 34]
 
-    def __init__(self, generate_map: GenerateMap):
-        self.map = generate_map
-        self.colored_map = numpy.zeros((self.map.mapSize[0], self.map.mapSize[1], 3))
+    mask_color_transparent = [0, 0, 255, 0]
+    mask_color_opaque = [0, 255, 0, 255]
 
-    def get_color_map_array(self, sea_level, sand_height):
-        """La couleur est définie en fonction de la valeur de la heightmap et du sea level"""
+    def __init__(self, generated_map: GenerateMap, sea_level, sand_height, *groups):
+        super().__init__(*groups)
+        self.map = generated_map
+        self.colored_map = numpy.zeros((self.map.mapSize[0], self.map.mapSize[1], 3), numpy.uint8)
+        self.mask_map_nparray = numpy.zeros((self.map.mapSize[0], self.map.mapSize[1], 4), numpy.uint8)
+
         for i in range(self.map.mapSize[0]):
             for j in range(self.map.mapSize[1]):
                 if self.map.heightMap[i][j] < sea_level:
                     self.colored_map[i][j] = ColorMap.sea
+                    self.mask_map_nparray[i][j] = ColorMap.mask_color_transparent
                 elif self.map.heightMap[i][j] < (sea_level + sand_height):
                     self.colored_map[i][j] = ColorMap.sand
+                    self.mask_map_nparray[i][j] = ColorMap.mask_color_transparent
                 else:
                     self.colored_map[i][j] = ColorMap.grass
-        return self.colored_map
+                    self.mask_map_nparray[i][j] = ColorMap.mask_color_opaque
+
+        self.image = pygame.surfarray.make_surface(self.colored_map)
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(make_surface_rgba(self.mask_map_nparray))
+
+
+def make_surface_rgba(array):
+    """Returns a surface made from a [w, h, 4] numpy array with per-pixel alpha"""
+    shape = array.shape
+    if len(shape) != 3 and shape[2] != 4:
+        raise ValueError("Array not RGBA")
+
+    # Create a surface the same width and height as array and with per-pixel alpha
+    surface = pygame.Surface(shape[0:2], pygame.SRCALPHA, 32)
+
+    # Copy the rgb part of array to the new surface.
+    pygame.pixelcopy.array_to_surface(surface, array[:, :, 0:3])
+
+    # Copy the alpha part of array to the surface using a pixels-alpha view of the surface
+    surface_alpha = numpy.array(surface.get_view("A"), dtype=numpy.uint8, copy=False)
+    surface_alpha[:, :] = array[:, :, 3]
+
+    return surface
