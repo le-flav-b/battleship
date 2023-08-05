@@ -139,7 +139,7 @@ class Game:
 
         # player
         player = Player(self.screen, Pos(self.screen_width / 2, self.screen_height / 2), Speed(0, 0),
-                        mass=10, max_power=1000, boat_image=Player.boat_1_image)
+                        mass=10, max_power=2000, boat_image=Player.boat_1_image)
 
         # enemy
         enemy = Boat(self.screen, Pos(self.screen_width / 4, self.screen_height / 2), Speed(0, 0),
@@ -202,25 +202,19 @@ class Game:
             if self.pressing_keys[pg.K_d] or self.pressing_keys[pg.K_RIGHT]:
                 player.rotate(1, time_step, self.map_data, self.sea_level)
 
-            player.run(time_step, self.map_data, self.sea_level)
+            player.run(time_step, self.map_data, self.sea_level, self.sand_level)
 
             # bullets moves
             for bullet in bullet_group:
                 bullet.run(time_step)
                 if pygame.sprite.spritecollide(bullet, player_g, False):
                     if pygame.sprite.spritecollide(bullet, player_g, False, pygame.sprite.collide_mask):
-                        print("player touched")
                         player.take_damage(bullet.shooter_boat.bullets_damage)
                         bullet.kill()
-                    else:
-                        print("player frolé")
                 if pygame.sprite.spritecollide(bullet, enemy_g, False):
                     if pygame.sprite.spritecollide(bullet, enemy_g, False, pygame.sprite.collide_mask):
-                        print("enemy touched")
                         enemy.take_damage(bullet.shooter_boat.bullets_damage)
                         bullet.kill()
-                    else:
-                        print("enemy frolé")
 
             # player health
             player.display_health()
@@ -240,6 +234,9 @@ class Game:
                     return 0
 
                 # manage pressed keys
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        over = True
                 if event.type == pg.KEYDOWN and event.key in self.pressing_keys.keys():
                     self.pressing_keys[event.key] = True
                 if event.type == pg.KEYUP and event.key in self.pressing_keys.keys():
@@ -265,7 +262,7 @@ class Game:
 
         if not running: return 0
 
-        return_to_menu = False
+        return_to_menu = True
         while not return_to_menu:
 
             # update the screen

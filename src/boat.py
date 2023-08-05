@@ -38,7 +38,7 @@ class Boat(pygame.sprite.Sprite):
         self.max_health = 100
         self.health = self.max_health
         self.bullets_damage = 5
-        self.bullet_speed_norm = 100
+        self.bullet_speed_norm = 300
 
     def rotate(self, angle, time_step, map_data, sea_level):
         """lorsque le bateau tourne, il conserve sa vitesse
@@ -66,11 +66,11 @@ class Boat(pygame.sprite.Sprite):
         else:
             self.engine_power = self.max_power
 
-    def run(self, time_step, map_data, sea_level):
+    def run(self, time_step, map_data, sea_level, sand_level):
         """opérations à effectuer à chaque tick"""
         # calcul des forces en présence et application de la seconde loi de Newton
         speed_norm = self.dot.speed.get_norm()
-        resultant = self.calcul_resultante(map_data, sea_level)
+        resultant = self.calcul_resultante(map_data, sea_level, sand_level)
         self.dot.run(resultant, time_step)
 
         # arrêt du bateau s'il freine et que sa vitesse est faible
@@ -83,7 +83,7 @@ class Boat(pygame.sprite.Sprite):
         self.rect.center = (self.dot.pos.x, self.dot.pos.y)
         self.screen.blit(self.image, self.rect)
 
-    def calcul_resultante(self, map_data, sea_level):
+    def calcul_resultante(self, map_data, sea_level, sand_level):
         """calcul des forces à appliquer au bateau"""
         sand_friction_force = Force(0, 0)
         water_friction_force = Force(0, 0)
@@ -149,9 +149,9 @@ class Boat(pygame.sprite.Sprite):
             black = (0, 0, 0)
             green = (65, 225, 77)
 
-            back_rect = pygame.rect.Rect(0, 0, 34, 10)
+            back_rect = pygame.rect.Rect(0, 0, 40, 10)
             back_rect.center = (self.dot.pos.x, self.dot.pos.y - self.rect.height / 2 - 8)
             pygame.draw.rect(self.screen, black, back_rect)
 
-            front_rect = pygame.rect.Rect(back_rect.x + 1, back_rect.y + 1, 32 * self.health / self.max_health, 8)
+            front_rect = pygame.rect.Rect(back_rect.x + 1, back_rect.y + 1, 38 * self.health / self.max_health, 8)
             pygame.draw.rect(self.screen, green, front_rect)
