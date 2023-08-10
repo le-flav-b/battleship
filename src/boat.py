@@ -46,7 +46,7 @@ class Boat(pygame.sprite.Sprite):
 
         # bloque la rotation du bateau s'il n'est pas dans l'eau
         height_level = self.get_height_level(map_data)
-        if height_level - 1 > sea_level:
+        if height_level > sea_level:
             return
 
         speed_norm = self.dot.speed.get_norm()
@@ -90,7 +90,6 @@ class Boat(pygame.sprite.Sprite):
 
         speed_norm = self.dot.speed.get_norm()
         height_level = self.get_height_level(map_data)
-        print("height level:", height_level, "sea_level:", sea_level, "sand_level:", sea_level + sand_level)
 
         # block the boat in the land if it goes to
         if height_level >= sea_level and speed_norm <= 20:
