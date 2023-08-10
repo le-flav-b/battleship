@@ -137,7 +137,7 @@ class Game:
         map_data = GenerateMap(self.screen_size)
 
         # map image and mask generation
-        self.color_map = ColorMap(map_data, self.sea_level, self.sand_level)
+        color_map = ColorMap(map_data, self.sea_level, self.sand_level)
 
         # define spawn points
         spawn_point = SpawnPoint(map_data, self.sea_level, 50)
@@ -164,7 +164,7 @@ class Game:
         while not over:
 
             # map image
-            self.screen.blit(self.color_map.image, (0, 0))
+            self.screen.blit(color_map.image, color_map.rect)
 
             # gestion du temps pour que la vitesse du joueur ne depende pas de la vitesse du processeur
             time_now = t()
@@ -221,7 +221,7 @@ class Game:
                         enemy.take_damage(bullet.shooter_boat.bullets_damage)
                         bullet.kill()
 
-            pygame.sprite.spritecollide(self.color_map, bullet_group, True, pygame.sprite.collide_mask)
+            pygame.sprite.spritecollide(color_map, bullet_group, True, pygame.sprite.collide_mask)
 
             # player health
             player.display_health()

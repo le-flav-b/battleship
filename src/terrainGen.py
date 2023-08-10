@@ -60,6 +60,7 @@ class ColorMap(pygame.sprite.Sprite):
     mask_color_opaque = [0, 255, 0, 255]
 
     def __init__(self, generated_map: GenerateMap, sea_level, sand_height, *groups):
+        """creation d'un mask du terrain pour les boulets, ainsi que de l'image de la carte"""
         super().__init__(*groups)
         self.map = generated_map
         self.colored_map = numpy.zeros((self.map.mapSize[0], self.map.mapSize[1], 3), numpy.uint8)
@@ -102,8 +103,10 @@ def make_surface_rgba(array):
 
 
 class SpawnPoint:
+    """Classe donnant tous les points de spawn possible pour les bateaux"""
 
     def __init__(self, generated_map: GenerateMap, sea_level, space_between_spawn_point):
+        """Génération des points de spawn"""
         self.sbsp = space_between_spawn_point
         self.map = generated_map
         self.possible_spawns = numpy.empty((int(self.map.mapSize[0] / self.sbsp), int(self.map.mapSize[1] / self.sbsp), 1),
@@ -118,6 +121,7 @@ class SpawnPoint:
                     self.possible_spawns[i][j] = False
 
     def get_spawn_point(self) -> Pos:
+        """obtention d'un point de spawn au hasard"""
         selected_spawn = random.randint(1, self.nb_spawn_points)
         spawn_points_passed = 0
         for i in range(len(self.possible_spawns)):

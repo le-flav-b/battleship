@@ -6,6 +6,7 @@ class Bullet(pygame.sprite.Sprite):
     bullet_image = pygame.transform.scale(pygame.image.load("assets/images/bullet.png"), (15, 15))
 
     def __init__(self, screen: pygame.Surface, shooter_boat, boat_pos: Pos, speed: Speed, *groups):
+        """Initialisation du boulet, qui aura une vitesse constante"""
         super().__init__(*groups)
         self.screen = screen
         self.shooter_boat = shooter_boat
